@@ -1,0 +1,71 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+This is a skeleton html file that you can use to get you started on each new
+HTML project
+
+Name: Your Name Here
+Class: CIS 3303
+Section: x
+-->
+<html>
+
+<head>
+<title>My Title</title>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.6.3.min.js"></script>
+<script type="text/javascript">
+  // See the Configuring section to configure credentials in the SDK
+  AWS.config.credentials = {accessKeyId: 'AKIAJJLK5TACYCAGIHGQ', secretAccessKey: 'AHLkD0akakPYzpVXEEb8IZsGi3ypxcZPWRf3ZkTl'};
+  // Configure your region
+  AWS.config.region = 'us-east-1';
+  var sqs = new AWS.SQS();
+
+  setInterval(getMessage, 1000);
+
+  function getMessage() {
+    sqs.getQueueUrl({QueueName: 'Pipi'}, function (err, data) {
+        if (data) {
+            var url = data.QueueUrl; // use this queue URL to operate on the queue
+            var queue = new AWS.SQS({params: {QueueUrl: url}}); // using url to queue
+            queue.receiveMessage(function (err, data) {
+                var i, message, elem
+                 if (data.Messages) {
+                    for (i = 0; i < data.Messages.length; i++) {
+                        message = data.Messages[i];
+                        console.log(message); // message data in Messages structure
+                        removeFromQueue(message);
+                    }
+                    if (message) {
+                        elem = document.getElementById("viewport");
+            			elem.src = './welcome.gif';
+                        setTimeout( function() {
+                            elem.src = 'black.jpg';
+                           }, 10000);
+                    }
+                 }
+            });
+
+        function removeFromQueue(message) {
+            sqs.deleteMessage({
+               QueueUrl: url,
+               ReceiptHandle: message.ReceiptHandle
+            }, function(err, data) {
+                 // If we errored, tell us that we did
+                 err && console.log(err);
+           });
+        }
+      }
+    });
+  }
+</script>
+</head>
+
+<body>
+
+    <div>
+	<img id='viewport' src='black.jpg'></img>
+    </div>
+
+</body>
+</html>
